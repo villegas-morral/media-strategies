@@ -1,11 +1,12 @@
 function parameters(;
         L = 4,  # number of influencers
         M = 2, # number of media, warning: in some places the code assumes that M=2 and is not generalized
-        n = 250, # number of agents 
-        eta = 15.0, # rate constant for changing influencer  
+        n = 250, # number of agents
+        eta = 15.0, # rate constant for changing influencer
+        switching = false, # whether individuals switch influencer (at rate eta)
         a = 1., # interaction strength between agents
-        b = 4., # interaction strength between agents and influencers
-        c = 2., # interaction strength between agents and media 
+        b = 3., # interaction strength between agents and media
+        c = 3., # interaction strength between agents and influencers
         sigma = 0.5, # noise on individual agents
         sigmahat = 0., # noise on influencers, warning: in some places in the code it is assumed that sigmahat=0
         sigmatilde = 0., # noise on media, warning: in some places in the code it is assumed that sigmatilde=0
@@ -17,22 +18,23 @@ function parameters(;
         controltarget2 = [1.5 1.5]
     )
 
-    q = (; n, L, M, frictionM, frictionI, a, b, c, eta, sigma, sigmahat, sigmatilde, controlspeed1,controltarget1, controlspeed2,controltarget2)
+    q = (; n, L, M, frictionM, frictionI, a, b, c, eta, switching, sigma, sigmahat, sigmatilde, controlspeed1,controltarget1, controlspeed2,controltarget2)
     return q
 end
 
+
 function parametersstronginf()
-    q = parameters(;eta=1.) 
+    q = parameters(;eta=1.)
     return q
 end
 
 
 function ABMconstruct(;
         # setting simulation parameters
-        dt = 0.01,  # simulation stepsize 
+        dt = 0.01,  # simulation stepsize
         dx = 0.05,
         dy = dx,
-        domain =  2.2*[-1 1; -1 1]
+        domain = 2.2*[-1 1; -1 1]
     )
     X = [x for x in domain[1,1]:dx:domain[1,2], y in domain[2,1]:dy:domain[2,2]]
     Y = [y for x in domain[1,1]:dx:domain[1,2], y in domain[2,1]:dy:domain[2,2]]
@@ -42,14 +44,15 @@ function ABMconstruct(;
     return p
 end
 
+
 function PDEconstruct(;
         # Define the constants for the PDE
-        dx = 0.05,  
+        dx = 0.05,
         dy = dx,
         domain = 2.2*[-1 1; -1 1] # warning: in some places it is assumed that dy=dx and that the domain is square
     )
     N_x = Int(round((domain[1,2]-domain[1,1])/dx+1))
-    N_y = Int(round((domain[2,2]-domain[2,1])/dy+1)) #so far only works if N_y = N_x
+    N_y = Int(round((domain[2,2]-domain[2,1])/dy+1)) # so far only works if N_y = N_x
     N = N_x*N_y
     dV = dx*dy # to integrate the agent distribution
     X = [x for x in domain[1,1]:dx:domain[1,2], y in domain[2,1]:dy:domain[2,2]]
@@ -66,17 +69,20 @@ function PDEconstruct(;
     return p
 end
 
+
 function PDEconstructcoarse()
     return PDEconstruct(;dx = 0.1, dy = 0.1,domain = 2.3*[-1 1; -1 1])
 end
 
-function PDEconstructmeso() #for final optimal control computations
+
+function PDEconstructmeso() # for final optimal control computations
     return PDEconstruct(;dx = 44/600, dy = 44/600, domain = 2.2*[-1 1; -1 1])
 end
 
+
 function parameterscontrol(;ntarg=3, speedbound = 2, Tmax = 5,tequil = 5.,dtmin =0.001, start="influencer", maximize="follower",alpha=0.05,mindist=5.)
     r = (; ntarg, speedbound, Tmax,tequil,dtmin,start,maximize,alpha,mindist)
-    #options for start: "zero", "mean", "influencer"
-    #options for maximize:  "follower", "counter_follower"
+    # options for start: "zero", "mean", "influencer"
+    # options for maximize:  "follower", "counter_follower"
     return r
 end
