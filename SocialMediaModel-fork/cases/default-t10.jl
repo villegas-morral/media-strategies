@@ -1,5 +1,5 @@
 # Default (with switching) up to T=10. The PDE takes about 6 minutes.
-# Run from the SocialMediaModel-fork folder (plots go to figures/img/): include("cases/default-t10.jl")
+# Run from the SocialMediaModel-fork folder (plots go to img-default-t10/): include("cases/default-t10.jl")
 
 using SocialMediaModel
 

@@ -1,5 +1,5 @@
 # No switching, 2 influencers at (1,-1) and (-1,1), 2 media at (-1,-1) and (1,1), T=2.
-# Run from the SocialMediaModel-fork folder (plots go to figures/img/): include("cases/default-ns-2inf.jl")
+# Run from the SocialMediaModel-fork folder (plots go to img-default-ns-2inf/): include("cases/default-ns-2inf.jl")
 
 using SocialMediaModel
 

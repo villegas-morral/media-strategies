@@ -3,7 +3,7 @@
 This repository contains the Julia code accompanying the paper 
 ["Modelling opinion dynamics under the impact of influencer and media strategies"](https://doi.org/10.1038/s41598-023-46187-9). 
 
-![](figures/img-default/default_abm.gif)
+![](../figures/img-default/default_abm.gif)
 
 
 ## Components

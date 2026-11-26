@@ -77,11 +77,11 @@ function PDEsolveensemble(tmax=0.1, N=10; savepoints = 4, alg=nothing, init="4in
 end
 
 
-function runensembles(N; NT=200, tmax=2., savepoints = 5, q=parameters(),sigma=0.1,save=true,savedata=false)
+function runensembles(N; NT=200, tmax=2., savepoints = 5, q=parameters(),sigma=0.1,save=true,savedata=false, init="4inf", name=init)
     # pde
-    us, ys, zs, (p,q)= PDEsolveensemble(tmax, 1;savepoints=savepoints, q=q,save=save,savedata=savedata)
+    us, ys, zs, (p,q)= PDEsolveensemble(tmax, 1;savepoints=savepoints, init=init, q=q,save=save,savedata=savedata)
     # abm
-    us2, ys2, zs2, (p2,q2) = ABMsolveensemble(NT,N; savepoints=savepoints, q=q,sigma=sigma,save=save,savedata=savedata)
-    plotensemblesnapshots(us, ys, zs, (p,q), us2, ys2, zs2, (p2,q), tmax; name="4inf",save=save)
+    us2, ys2, zs2, (p2,q2) = ABMsolveensemble(NT,N; savepoints=savepoints, init=init, q=q,sigma=sigma,save=save,savedata=savedata)
+    plotensemblesnapshots(us, ys, zs, (p,q), us2, ys2, zs2, (p2,q), tmax; name=name,save=save)
     return us, ys, zs, (p,q), us2, ys2, zs2, (p2,q)
 end

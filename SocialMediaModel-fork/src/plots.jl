@@ -13,10 +13,13 @@ size_individuals = 6
 cmap = reverse(cgrad(:gist_earth))
 color_noinf = :white
 
+# figures go to img/ when name is just the init label (no custom name), else to img-<name>/ (runs worth keeping are moved by hand to ../figures/)
+figdir(name) = mkpath(name in ("4inf", "closer", "2inf", "uniform", "random") ? "img" : string("img-", name)) * "/"
+
 
 ### PDE
 
-function PDEplotsingle(u,y,z,(p,q),t; save=true, name="4inf", clim=(0,Inf), ylabel="", title = string("t=", string(round(t, digits=2))))
+function PDEplotsingle(u,y,z,(p,q),t; save=true, name="4inf", clim=(0,Inf), ylabel="", title = latexstring("t = ", string(round(t, digits=2))))
     (; domain, dx, dy) = p
     (;controlled_inf, controlled_med) = q # this only works for controlled scenario!
     L = q.L
@@ -48,7 +51,7 @@ function PDEplotsingle(u,y,z,(p,q),t; save=true, name="4inf", clim=(0,Inf), ylab
 
     if save == true
         # savefig(string("figures/img/pde_single_",name,".png"))
-        savefig(string("figures/img/",name,"_pde-single.pdf"))
+        savefig(string(figdir(name),name,"_pde-single.pdf"))
     end
     return subp
 end
@@ -70,7 +73,7 @@ function PDEplotsnapshots(sols::Vector, Ps::Vector, ts; save = true, name="4inf"
         for t in ts
             if t >= sum_t && t < sum_t + sol.t[end]
                 u,y,z = sol2uyz(sol, t-sum_t)
-                title = string("t = ", string(round(t, digits=2)))
+                title = latexstring("t = ", string(round(t, digits=2)))
 
                 if followercount == true && t >= 5
                     (p,q) = P
@@ -84,7 +87,7 @@ function PDEplotsnapshots(sols::Vector, Ps::Vector, ts; save = true, name="4inf"
                 push!(plot_array, subp)
             elseif counter == n_sols && t >= sum_t && t == sum_t + sol.t[end]
                 u,y,z = sol2uyz(sol, t-sum_t)
-                title = string("t = ", string(round(t, digits=2)))
+                title = latexstring("t = ", string(round(t, digits=2)))
 
                 if followercount == true && t >= 5
                     (p,q) = P
@@ -114,7 +117,7 @@ function PDEplotsnapshots(sols::Vector, Ps::Vector, ts; save = true, name="4inf"
 
     if save == true
         # savefig(string("figures/img/pde_snapshots_",name,".png"))
-        savefig(string("figures/img/",name,"_pde.pdf"))
+        savefig(string(figdir(name),name,"_pde.pdf"))
     end
 end
 
@@ -135,7 +138,7 @@ function PDEplotsnapshots1row(sols::Vector, Ps::Vector, ts; save = true, name="4
         for t in ts
             if t >= sum_t && t < sum_t + sol.t[end]
                 u,y,z = sol2uyz(sol, t-sum_t)
-                title = string("t = ", string(round(t, digits=2)))
+                title = latexstring("t = ", string(round(t, digits=2)))
 
                 if followercount == true && t >= 5
                     (p,q) = P
@@ -149,7 +152,7 @@ function PDEplotsnapshots1row(sols::Vector, Ps::Vector, ts; save = true, name="4
                 push!(plot_array, subp)
             elseif counter == n_sols && t >= sum_t && t == sum_t + sol.t[end]
                 u,y,z = sol2uyz(sol, t-sum_t)
-                title = string("t = ", string(round(t, digits=2)))
+                title = latexstring("t = ", string(round(t, digits=2)))
 
                 if followercount == true && t >= 5
                     (p,q) = P
@@ -176,7 +179,7 @@ function PDEplotsnapshots1row(sols::Vector, Ps::Vector, ts; save = true, name="4
 
     if save == true
         # savefig(string("figures/img/pde_snapshots_",name,".png"))
-        savefig(string("figures/img/",name,"_pde.pdf"))
+        savefig(string(figdir(name),name,"_pde.pdf"))
     end
 end
 
@@ -196,7 +199,7 @@ function PDEgifsingle(sols::Vector, Ps::Vector, dt=0.1; save=true, name = "4inf"
         T += sol.t[end]
     end
     if save == true
-        Plots.gif(anim, string("figures/img/",name,"_pde.gif"), fps = 10)
+        Plots.gif(anim, string(figdir(name),name,"_pde.gif"), fps = 10)
     end
 end
 
@@ -273,7 +276,7 @@ function ABMplotsnapshots(xs, stateinfs, infs, meds, state, (p,q), ts; save = tr
         inf = infs[t]
         media = meds[t]
         stateinf = stateinfs[t]
-        title = string("t = ", string(round((t-1)*dt, digits=2)))
+        title = latexstring("t = ", string(round((t-1)*dt, digits=2)))
         subp = ABMplotsingle(x, inf', media', state, stateinf, (p,q),  clim=(0,0.5),color_agents=true,sigma=sigma,title=title,kde=kde)
         push!(plot_array, subp)
     end
@@ -290,7 +293,7 @@ function ABMplotsnapshots(xs, stateinfs, infs, meds, state, (p,q), ts; save = tr
 
     if save == true
         # savefig(string("figures/img/abm_snapshots_",name,".png"))
-        savefig(string("figures/img/",name,"_abm.pdf"))
+        savefig(string(figdir(name),name,"_abm.pdf"))
     end
 end
 
@@ -320,7 +323,7 @@ function ABMplotfollowernumbers(stateinfs,state,(p,q);save=true,name="4inf")
     end
     props = (1/n)*reshape(numbers,(N, L*2))
 
-    subp = areaplot(dt*collect(1:N), props, seriescolor = permutedims(scolors), fillalpha = permutedims(alphas),title="Proportion of followers",labels = permutedims(labels),size=(95*5,60*5),xlabel="t",legend=false)
+    subp = areaplot(dt*collect(1:N), props, seriescolor = permutedims(scolors), fillalpha = permutedims(alphas),title="Proportion of followers",labels = permutedims(labels),size=(95*5,60*5),xlabel=L"t",legend=false)
     for j in 1:L
         for i in 1:2
             scatter!(subp, [0.05], [sum(props[5,1:2*(j-1) + i])-0.5*props[5,2*(j-1) + i]], markercolor=colors_followers[j],markershape=markers_readers[i],markersize=1.5*size_individuals,legend=false)
@@ -328,7 +331,7 @@ function ABMplotfollowernumbers(stateinfs,state,(p,q);save=true,name="4inf")
     end
     if save == true
         # savefig(string("figures/img/abm_follower_",name,".png"))
-        savefig(string("figures/img/",name,"_abm-props.pdf"))
+        savefig(string(figdir(name),name,"_abm-props.pdf"))
     end
 end
 
@@ -338,11 +341,11 @@ function ABMgifsingle(xs, stateinfs, state, infs, meds, (p,q); save=true, dN=5, 
     (;dt) = p
 
     abmgif = @animate for t = 1:dN:NT
-        subp = ABMplotsingle(xs[t], infs[t]', meds[t]',state,stateinfs[t], (p,q), title = string("t = ", string(round((t-1)*dt, digits=2))),color_agents=true)
+        subp = ABMplotsingle(xs[t], infs[t]', meds[t]',state,stateinfs[t], (p,q), title = latexstring("t = ", string(round((t-1)*dt, digits=2))),color_agents=true)
         plot(subp)
     end
     if save == true
-        Plots.gif(abmgif, string("figures/img/",name,"_abm.gif"), fps = 10)
+        Plots.gif(abmgif, string(figdir(name),name,"_abm.gif"), fps = 10)
     end
 end
 
@@ -381,7 +384,7 @@ function plotensemblesnapshots(us, ys, zs, (p,q), us2, ys2, zs2, (p2,q2), tmax; 
             clmax = maximum([maxus[k],maxus2[k]])
 
             if i == 1
-                title = string("t=", string(round(savetimes[k], digits=2)))
+                title = latexstring("t = ", string(round(savetimes[k], digits=2)))
             else
                 title = ""
             end
@@ -414,6 +417,6 @@ function plotensemblesnapshots(us, ys, zs, (p,q), us2, ys2, zs2, (p2,q2), tmax; 
 
     if save == true
         # savefig(string("figures/img/ensemblesnapshots_",name,".png"))
-        savefig(string("figures/img/",name,"_pde-ensemble.pdf"))
+        savefig(string(figdir(name),name,"_pde-ensemble.pdf"))
     end
 end

@@ -267,10 +267,10 @@ function f(duyz,uyz,(p,q),t)
             a_AB_BAT!(dif, D, MassM, rho) # inplace dif = D*(M*rho + rho*M')
 
             # balance fluxes at boundary (part of boundary conditions)
-            dif[1,:] += -D/dx * (rhoforce[1,:,1])
-            dif[end,:] += D/dx * (rhoforce[end,:,1])
-            dif[:,1] += -D/dy * (rhoforce[:,1,2])
-            dif[:,end] += D/dy * (rhoforce[:,end,2])
+            dif[1,:] += -1/dx * (rhoforce[1,:,1])
+            dif[end,:] += 1/dx * (rhoforce[end,:,1])
+            dif[:,1] += -1/dy * (rhoforce[:,1,2])
+            dif[:,end] += 1/dy * (rhoforce[:,end,2])
 
             drho .=  dif .- dive
             if switching
@@ -336,7 +336,7 @@ function PDEsolve(tmax=0.1; alg=nothing, init="4inf", p = PDEconstruct(), q= par
 
     # Solve the ODE
     prob = ODEProblem(f,uyz0,(0.0,tmax),(p,q))
-    @time sol = DifferentialEquations.solve(prob, alg, alg_hints = [:stiff], save_start=true)
+    @time sol = DifferentialEquations.solve(prob, alg, alg_hints = [:stiff], save_start=true, progress=true, progress_steps=1)
 
     return sol, (p,q)
 end

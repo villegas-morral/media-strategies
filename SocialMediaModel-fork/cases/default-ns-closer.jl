@@ -1,5 +1,5 @@
 # No switching, influencers and media closer: at (±0.6,±0.6), T=2.
-# Run from the SocialMediaModel-fork folder (plots go to figures/img/): include("cases/default-ns-closer.jl")
+# Run from the SocialMediaModel-fork folder (plots go to img-default-ns-closer/): include("cases/default-ns-closer.jl")
 
 using SocialMediaModel
 

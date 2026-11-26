@@ -1,4 +1,9 @@
 module SocialMediaModel
+    using TerminalLoggers
+    function __init__()
+        Base.CoreLogging.global_logger(TerminalLogger()) # progress bars for PDE solve and ABM loop
+        Plots.default(fontfamily="Computer Modern") # LaTeX-style plots (titles are LaTeX strings in plots.jl)
+    end
     include("setting.jl")
     include("pde.jl")
     include("abm.jl")

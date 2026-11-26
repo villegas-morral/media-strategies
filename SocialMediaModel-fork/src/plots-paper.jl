@@ -15,7 +15,7 @@ function paperfigures()
     # saved by runensembles(...; savedata=true)
     @load string("data/pde-ensemble/pde_ensemble_4inf.jld2") us ys zs p q
     @load string("data/pde-ensemble/abm_ensemble_4inf.jld2") us2 ys2 zs2 p2 q2
-    plotensemblesnapshots(us, ys, zs, (p,q), us2, ys2, zs2, (p2,q), 2.; name="4inf",save=save)
+    plotensemblesnapshots(us, ys, zs, (p,q), us2, ys2, zs2, (p2,q), 2.; name="4inf",save=true)
 
     # optimizations
     infrightcorner();

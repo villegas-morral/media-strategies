@@ -2,6 +2,7 @@ using LinearAlgebra
 using StatsBase
 using Random
 using JLD2
+using ProgressLogging
 
 
 """Set initial conditions"""
@@ -268,7 +269,7 @@ function ABMsolve(NT = 100;  p = ABMconstruct(), q=parameters(), init="4inf",cho
     meds = [copy(media)] # list of opinions of media in time
     stateinfs = [copy(FolInfNet) * collect(1:L)] # list of which influencer an individual follows in time
 
-    for k in 2:NT+1
+    @progress for k in 2:NT+1
         xold = x
 
         # opinions change due to interaction with opinions of friends, influencers and media
