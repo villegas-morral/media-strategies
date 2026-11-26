@@ -12,14 +12,22 @@ Run these steps in order. Do not change any source code (`SocialMediaModel-fork/
 
 ## 1. Setup
 
+If the repo is already cloned:
+
 ```bash
 git fetch && git checkout boundary-fix && git pull
 ```
 
-Julia **1.8.5** only (the Manifest fails on newer versions):
+Julia **1.8.5** only (the Manifest fails on newer versions). If `juliaup` is missing, install it first with `curl -fsSL https://install.julialang.org | sh` (then open a new shell):
 
 ```bash
 juliaup add 1.8.5
+```
+
+If the workstation has no display (SSH, server), GR must write to files instead of opening windows. Set this in the shell that runs Julia:
+
+```bash
+export GKSwstype=100
 ```
 
 ```bash

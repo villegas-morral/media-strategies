@@ -76,6 +76,10 @@ and the two agree only if $\sigma = \sqrt2$.
 
 **What changed** (26 Nov 2026): the four lines now use `1/dx` and `1/dy`. Nothing else changed.
 
+In `default-ns-2inf`, where the density starts on the walls, the bug is clearly visible at $t = 0.1$ (fixed on the left, old on the right):
+
+![PDE snapshots, fixed vs old boundary term](figures/img-default-ns-2inf_comparison/default-ns-2inf_comparison_pde.png)
+
 ## 5. Effect on mass
 
 Sum $\dot\rho_i$ over a grid row. The columns of $M$ sum to zero, so diffusion drops out. The centred sum telescopes:
@@ -120,3 +124,45 @@ These are the values at $t = 2$ ($t = 10$ for `default-t10`, the same as at $t =
 - The scheme description (line 311: Neumann Laplacian, one-sided drift at the boundary, a correction term to balance fluxes) matches the code; it doesn't state the factor.
 - The figures in `1 paper/figures/` were made with the old code.
 - Line 417 notes "numerical artefacts close to the boundary at $t=0.1$" in the two-influencer case. Those artefacts come from this bug: they disappear with the fix (see `figures/img-default-ns-2inf_comparison/`).
+
+## 7. A separate issue: the initial conditions don't match
+
+This is not part of the bug, but it decides how much the bug shows.
+
+All simulations live in the same box $D = [-2.2, 2.2]^2$. The question is **where the individuals are at $t = 0$**:
+
+| setup | ABM | PDE |
+|---|---|---|
+| 4 influencers (`4inf`, `closer`) | uniform on the whole box $[-2.2, 2.2]^2$ | uniform on $[-2, 2]^2$ only; **zero** in the 0.2-wide strip along the walls |
+| 2 influencers (`2inf`) | uniform on the whole box | uniform on the whole box |
+
+The red dashed square is $[-2, 2]^2$:
+
+![Initial conditions: ABM vs PDE, 4 and 2 influencers](figures/img-initial-conditions/initial-conditions.png)
+
+- **Top left, ABM with 4 influencers:** individuals all the way to the walls, including the strip outside the red square.
+- **Top right, PDE with 4 influencers:** the coloured area stops at the red square. The strip between it and the walls is empty (white).
+- **Bottom row, 2 influencers:** ABM and PDE both fill the whole box.
+
+Along the line $y = 0$, the PDE initial density looks like this:
+
+![PDE initial density along y = 0](figures/img-initial-conditions/initial-conditions_profile.png)
+
+The 4-influencer density (blue) is a plateau between $-2$ and $2$ and drops to zero before the walls. Since the same total mass sits on a smaller area, the plateau is higher. The 2-influencer density (orange) is flat right up to the walls.
+
+**Where it is in the code:**
+- ABM: `ABMinit`, `ABMinit_closer`, `ABMinit_2inf` in `src/abm.jl` sample `x = rand(n,2) .* (domain[1,2]-domain[1,1]) .+ domain[1,1]`, i.e. the whole box.
+- PDE, 4 influencers: `uniforminit` in `src/pde.jl` (lines 67–72) fills only the indices from `start_x`, which corresponds to $x = -2$, to `end_x`, i.e. $x = 2$.
+- PDE, 2 influencers: `uniforminit_2inf` in `src/pde.jl` fills every grid point.
+
+**Consequences:**
+1. **The ABM–PDE comparison isn't like for like** in the 4-influencer cases: the two don't start from the same distribution. This affects e.g. the ensemble figure `figures/img-default/default_pde-ensemble.pdf`; at $t = 0$ the ABM row fills the box and the PDE row has an empty border.
+2. **The influencer start positions differ.** In the ABM each influencer starts at the mean of its followers, about $(\pm1.1, \pm1.1)$ for a quadrant of the whole box, and slightly random. In the PDE they start at exactly $(\pm1, \pm1)$, the mean of a quadrant of $[-2,2]^2$.
+3. **How much the boundary bug shows:** the 4-influencer PDE starts away from the walls, so little density reaches them (old code +1.1% mass). The 2-influencer PDE starts on the walls (+4.2%, and the artefacts at $t = 0.1$).
+4. **Helfmann et al. (2023)** say individuals are distributed "uniformly in the opinion space", i.e. the whole box. The ABM follows this; the 4-influencer PDE doesn't.
+
+**Options:**
+- **Everything on $[-2, 2]^2$** (recommended): change the three ABM inits and `uniforminit_2inf`. Everything then starts off the walls, where both the ABM reflection and the PDE wall scheme matter least, and the influencers start at exactly $(\pm1,\pm1)$ in both models. It departs slightly from the paper's wording, so state the $[-2,2]^2$ explicitly.
+- **Everything on the whole box:** change only `uniforminit`. This matches the paper's wording and leaves the ABM untouched. But all PDE runs then start on the walls, so they carry the remaining $O(\Delta x)$ wall error (about −2% mass, as in `default-ns-2inf` with the fixed code).
+
+Either option means rerunning all figures (and `figures-bug/`).
