@@ -4,7 +4,7 @@ Run these steps in order. Do not change any source code (`SocialMediaModel-fork/
 
 ## Context
 
-- `SocialMediaModel-fork/` is a Julia package. The PDE solver (`src/pde.jl`, "balance fluxes at boundary") used to add the wall correction with an extra factor `D = σ²/2` (`D/dx`, `D/dy`). It now uses `1/dx`, `1/dy`. Details: `code-bug.md`.
+- `SocialMediaModel-fork/` is a Julia package. The PDE solver (`src/solve-pde.jl`, "balance fluxes at boundary") used to add the wall correction with an extra factor `D = σ²/2` (`D/dx`, `D/dy`). It now uses `1/dx`, `1/dy`. Details: `code-bug.md`.
 - `figures/` holds all figures made with the **fixed** code, in LaTeX style. That includes the old-vs-fixed comparison (`figures/img-default-ns-2inf_comparison/`).
 - **Your job:** make `figures-bug/`, the same set of case figures but with the PDE computed with the **old (buggy)** term. Same LaTeX style. No comparison folder.
 - Plots are saved relative to the working directory: `img-<name>/` inside `SocialMediaModel-fork/`. So run Julia from `SocialMediaModel-fork/`.
@@ -50,12 +50,12 @@ const SMM = SocialMediaModel
 R = pwd()                                   # must be .../SocialMediaModel-fork
 @assert basename(R) == "SocialMediaModel-fork"
 
-# old (buggy) boundary term: put the factor D back, in a temporary copy of pde.jl
-src = read(joinpath(R, "src/pde.jl"), String)
+# old (buggy) boundary term: put the factor D back, in a temporary copy of solve-pde.jl
+src = read(joinpath(R, "src/solve-pde.jl"), String)
 old = replace(src, "+= -1/dx *" => "+= -D/dx *", "+= 1/dx *" => "+= D/dx *",
                    "+= -1/dy *" => "+= -D/dy *", "+= 1/dy *" => "+= D/dy *")
 @assert count("D/dx *", old) == 2 && count("D/dy *", old) == 2
-tmp = joinpath(tempdir(), "pde_old.jl"); write(tmp, old)
+tmp = joinpath(tempdir(), "solve-pde_old.jl"); write(tmp, old)
 Base.include(SMM, tmp)
 
 step(f, l) = try f(); println("OK ", l); flush(stdout) catch e; println("ERROR in ", l, ": ", sprint(showerror, e)); flush(stdout) end

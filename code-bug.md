@@ -19,7 +19,7 @@ This is exactly the condition in the Helfmann et al. (2023) supplementary ("No-f
 
 ## 2. What the code does
 
-The grid has nodes $x_1,\dots,x_N$ with spacing $\Delta x$, and $x_1$ and $x_N$ lie **on** the walls. In one direction (the other is identical), write $v_i = \rho_i F_{x,i}$. `f` in `src/pde.jl` computes
+The grid has nodes $x_1,\dots,x_N$ with spacing $\Delta x$, and $x_1$ and $x_N$ lie **on** the walls. In one direction (the other is identical), write $v_i = \rho_i F_{x,i}$. `f` in `src/solve-pde.jl` computes
 
 $$
 \dot\rho_i = D\,(M\rho)_i - (C v)_i + (\text{boundary term at } i = 1, N).
@@ -151,15 +151,15 @@ Along the line $y = 0$, the PDE initial density looks like this:
 The 4-influencer density (blue) is a plateau between $-2$ and $2$ and drops to zero before the walls. Since the same total mass sits on a smaller area, the plateau is higher. The 2-influencer density (orange) is flat right up to the walls.
 
 **Where it is in the code:**
-- ABM: `ABMinit`, `ABMinit_closer`, `ABMinit_2inf` in `src/abm.jl` sample `x = rand(n,2) .* (domain[1,2]-domain[1,1]) .+ domain[1,1]`, i.e. the whole box.
-- PDE, 4 influencers: `uniforminit` in `src/pde.jl` (lines 67–72) fills only the indices from `start_x`, which corresponds to $x = -2$, to `end_x`, i.e. $x = 2$.
-- PDE, 2 influencers: `uniforminit_2inf` in `src/pde.jl` fills every grid point.
+- ABM: `ABMinit`, `ABMinit_closer`, `ABMinit_2inf` in `src/solve-abm.jl` sample `x = rand(n,2) .* (domain[1,2]-domain[1,1]) .+ domain[1,1]`, i.e. the whole box.
+- PDE, 4 influencers: `uniforminit` in `src/solve-pde.jl` (lines 104–109) fills only the indices from `start_x`, which corresponds to $x = -2$, to `end_x`, i.e. $x = 2$.
+- PDE, 2 influencers: `uniforminit_2inf` in `src/solve-pde.jl` fills every grid point.
 
 **Consequences:**
 1. **The ABM–PDE comparison isn't like for like** in the 4-influencer cases: the two don't start from the same distribution. This affects e.g. the ensemble figure `figures/img-default/default_pde-ensemble.pdf`; at $t = 0$ the ABM row fills the box and the PDE row has an empty border.
 2. **The influencer start positions differ.** In the ABM each influencer starts at the mean of its followers, about $(\pm1.1, \pm1.1)$ for a quadrant of the whole box, and slightly random. In the PDE they start at exactly $(\pm1, \pm1)$, the mean of a quadrant of $[-2,2]^2$.
 3. **How much the boundary bug shows:** the 4-influencer PDE starts away from the walls, so little density reaches them (old code +1.1% mass). The 2-influencer PDE starts on the walls (+4.2%, and the artefacts at $t = 0.1$).
-4. **Helfmann et al. (2023)** say individuals are distributed "uniformly in the opinion space", but they never give its size: $D$ is only "bounded". The box $[-2.2, 2.2]^2$ comes from the code (`domain` in `src/setting.jl`). So the paper doesn't settle whether the start should be $[-2,2]^2$ or the whole box.
+4. **Helfmann et al. (2023)** say individuals are distributed "uniformly in the opinion space", but they never give its size: $D$ is only "bounded". The box $[-2.2, 2.2]^2$ comes from the code (`domain` in `ABMconstruct` and `PDEconstruct`). So the paper doesn't settle whether the start should be $[-2,2]^2$ or the whole box.
 
 **Options:**
 - **Everything on $[-2, 2]^2$** (recommended): change the three ABM inits and `uniforminit_2inf`. Everything then starts off the walls, where both the ABM reflection and the PDE wall scheme matter least, and the influencers start at exactly $(\pm1,\pm1)$ in both models. State the $[-2,2]^2$ explicitly in the paper.

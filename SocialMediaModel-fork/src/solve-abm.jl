@@ -5,6 +5,24 @@ using JLD2
 using ProgressLogging
 
 
+"""Numerical settings (time step, grid for plots and smoothing, domain)"""
+
+function ABMconstruct(;
+        # setting simulation parameters
+        dt = 0.01,  # simulation stepsize
+        dx = 0.05,
+        dy = dx,
+        domain = 2.2*[-1 1; -1 1]
+    )
+    X = [x for x in domain[1,1]:dx:domain[1,2], y in domain[2,1]:dy:domain[2,2]]
+    Y = [y for x in domain[1,1]:dx:domain[1,2], y in domain[2,1]:dy:domain[2,2]]
+    dV = dx*dy
+
+    p = (; dt, dx, dy, domain, X, Y, dV)
+    return p
+end
+
+
 """Set initial conditions"""
 
 # DEFAULT

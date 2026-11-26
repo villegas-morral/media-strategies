@@ -5,7 +5,7 @@ using Distances
 using LaTeXStrings
 
 
-"""Grid matrices (built once by PDEconstruct in setting.jl)"""
+"""Grid matrices (built once by PDEconstruct below)"""
 
 # interaction kernel on the grid: w(x,x') = exp(-|x'-x|) and k(x,x') = w(x,x') (x'-x)
 function generate_K(grid_points)
@@ -46,6 +46,43 @@ function centered_difference((N_x,N_y), (dx, dy))
     C[end,end-1:end] = 1/(dx)* [-1,1]
 
     return C
+end
+
+
+"""Numerical settings (grid, domain and the matrices above)"""
+
+function PDEconstruct(;
+        # Define the constants for the PDE
+        dx = 0.05,
+        dy = dx,
+        domain = 2.2*[-1 1; -1 1] # warning: in some places it is assumed that dy=dx and that the domain is square
+    )
+    N_x = Int(round((domain[1,2]-domain[1,1])/dx+1))
+    N_y = Int(round((domain[2,2]-domain[2,1])/dy+1)) # so far only works if N_y = N_x
+    N = N_x*N_y
+    dV = dx*dy # to integrate the agent distribution
+    X = [x for x in domain[1,1]:dx:domain[1,2], y in domain[2,1]:dy:domain[2,2]]
+    Y = [y for x in domain[1,1]:dx:domain[1,2], y in domain[2,1]:dy:domain[2,2]]
+    grid_points = [vec(X) vec(Y)]
+    # matrix of K evaluated at gridpoints
+    K_matrix, W_matrix  = generate_K(grid_points)
+
+    MassM = second_derivative((N_x,N_y), (dx, dy))
+    C = centered_difference((N_x,N_y), (dx, dy))
+
+    p = (; grid_points, dx, dy, dV, X, Y, N, N_x, N_y, domain, K_matrix, W_matrix, C,  MassM)
+
+    return p
+end
+
+
+function PDEconstructcoarse()
+    return PDEconstruct(;dx = 0.1, dy = 0.1,domain = 2.3*[-1 1; -1 1])
+end
+
+
+function PDEconstructmeso() # for final optimal control computations
+    return PDEconstruct(;dx = 44/600, dy = 44/600, domain = 2.2*[-1 1; -1 1])
 end
 
 

@@ -4,13 +4,13 @@ module SocialMediaModel
         Base.CoreLogging.global_logger(TerminalLogger()) # progress bars for PDE solve and ABM loop
         Plots.default(fontfamily="Computer Modern") # LaTeX-style plots (titles are LaTeX strings in plots.jl)
     end
-    include("setting.jl")
-    include("pde.jl")
-    include("abm.jl")
-    include("pde-ensemble.jl")
+    include("setting-general.jl")
+    include("solve-pde.jl")
+    include("solve-abm.jl")
+    include("solve-abm-ensemble.jl")
     include("plots.jl")
     include("controlstrategies.jl")
-    include("strategyexperiments.jl")
+    include("setting-control.jl")
     include("tests.jl")
     include("plots-paper.jl")
 
