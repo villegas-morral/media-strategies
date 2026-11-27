@@ -102,3 +102,25 @@ git add figures-bug && git commit -m "Add figures-bug: case figures with the old
 End the commit message with the attribution line your session gives you, if any.
 
 Then add a short **Log** section at the end of this file: date, run time, the `MASS` lines, and anything unexpected. Commit and push that too.
+
+## Log
+
+**2026-11-26**, Windows 11 workstation, Julia 1.8.5 (juliaup). Run time 1676 s (about 28 min). Every step `OK`, then `ALL DONE`.
+
+```
+MASS default = 1.0113  (expected 1.0113)
+MASS default-ns = 1.0112  (expected 1.0112)
+MASS default-ns-closer = 1.0182  (expected 1.0182)
+MASS default-ns-2inf = 1.0418  (expected 1.0418)
+MASS default-t10 = 1.0113  (expected 1.0113)
+```
+
+- All expected files were made and moved to `figures-bug/`. `default-ns-2inf_pde.pdf` shows the wall artefacts at t = 0.1.
+- The ABM PDFs render pixel for pixel the same as the ones in `figures/` (the files differ only in metadata). `default_abm.gif` is identical byte for byte.
+
+Unexpected:
+
+- `Pkg.instantiate()` failed while building PyCall: the pinned Conda.jl 1.7.0 downloads the Miniforge installer into the folder it installs to, and the current Miniforge (26.9.4) refuses a folder that isn't empty. Fixed without touching the Manifest: `ENV["PYTHON"]` points to the system Python 3.12.10, with `setuptools` installed there (PyCall 1.94.1 imports `distutils`, which Python 3.12 removed), then `Pkg.build("PyCall")`.
+- PyPlot 2.11 doesn't load with matplotlib 3.11 (`get_cmap` was removed). Not needed: the package plots with GR only.
+- `SocialMediaModel-fork/img/` doesn't exist (git doesn't keep empty folders). Harmless: the code makes it with `mkpath` when needed.
+- The first push failed because this machine had no GitHub credentials; it worked after `gh auth login` and `gh auth setup-git`.
