@@ -99,7 +99,7 @@ When it finishes, check the log:
 git add figures-bug && git commit -m "Add figures-bug: case figures with the old PDE boundary term (LaTeX style)" && git push
 ```
 
-End the commit message with the attribution line your session gives you, if any.
+Don't add yourself to the commit: no `Co-Authored-By` line or any other attribution. The author is the user only.
 
 Then add a short **Log** section at the end of this file: date, run time, the `MASS` lines, and anything unexpected. Commit and push that too.
 
